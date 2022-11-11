@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { commonResponseDto } from 'src/common/dtos/common-reponse.dto';
+import { PrismaService } from 'src/config/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
+  constructor(private readonly prismaService: PrismaService) {}
+
   createUser() {
-    return 'Hello';
+    return new commonResponseDto('Hello', { test: 'Test' });
   }
 
-  getMe() {
+  readMe() {
     return 'Hello';
   }
 
@@ -18,7 +22,7 @@ export class UsersService {
     return 'Hello';
   }
 
-  getMyHistories() {
+  readMyHistories() {
     return 'Hello';
   }
 

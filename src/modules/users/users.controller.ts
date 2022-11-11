@@ -12,7 +12,7 @@ export class UsersController {
 
   @Get('me')
   getMe() {
-    return this.usersService.getMe();
+    return this.usersService.readMe();
   }
 
   @Patch('me')
@@ -27,7 +27,7 @@ export class UsersController {
 
   @Get('me/histories')
   getMyHistories() {
-    return this.usersService.getMyHistories();
+    return this.usersService.readMyHistories();
   }
 
   @Post('me/histories')
