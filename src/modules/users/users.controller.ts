@@ -86,6 +86,7 @@ export class UsersController {
   }
 
   @Post('me/histories')
+  @HttpCode(201)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '유저 플레이 기록 추가' })
   @ApiBody({ type: HistoryRequestDto })
