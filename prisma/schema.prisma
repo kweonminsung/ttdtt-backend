@@ -24,7 +24,7 @@ model History {
   user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id     Int
   language_no Int
-  grammer_no  Int
+  grammar_no  Int
   record      Int
   created_at  DateTime  @default(now())
 }

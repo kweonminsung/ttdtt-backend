@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
 
-export class historyRequestDto {
+export class HistoryRequestDto {
   @ApiProperty()
   @Type(() => Number)
   @IsNotEmpty()

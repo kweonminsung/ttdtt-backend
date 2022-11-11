@@ -1,13 +1,13 @@
 import { Page } from 'src/common/dtos/pagination.dto';
-import { userResponseDto } from 'src/modules/users/dtos/user-response.dto';
+import { UserResponseDto } from 'src/modules/users/dtos/user-response.dto';
 
-export class rankResponseDto {
+export class RankResponseDto {
   ranks: {
-    user: userResponseDto;
+    user: UserResponseDto;
     language_no: number;
     grammar_no: number;
     record: number;
-    createdAt: Date;
+    created_at: Date;
   }[];
   ranks_meta: Page;
 }

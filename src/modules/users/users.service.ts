@@ -1,16 +1,20 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Injectable } from '@nestjs/common';
+import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS, TOTAL_IMAGE_NO } from 'src/common/constants';
-import { commonResponseDto } from 'src/common/dtos/common-reponse.dto';
+import { CommonResponseDto } from 'src/common/dtos/common-reponse.dto';
 import { PrismaService } from 'src/config/prisma/prisma.service';
-import { userRequestDto } from './dtos/user-request.dto';
-import { userResponseDto } from './dtos/user-response.dto';
-import { loginRequestDto } from './dtos/login-request.dto';
+import { UserRequestDto } from './dtos/user-request.dto';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { LoginRequestDto } from './dtos/login-request.dto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { BadRequestException } from '@nestjs/common/exceptions/bad-request.exception';
 import { UnauthorizedException } from '@nestjs/common/exceptions/unauthorized.exception';
+import { HistoryRequestDto } from './dtos/history-request.dto';
+import { HistoryResponseDto } from './dtos/history-reponse.dto';
+import { HistoryQuery } from './dtos/history-query.dto';
+import { Page } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,8 +24,8 @@ export class UsersService {
   ) {}
 
   async create(
-    dto: userRequestDto,
-  ): Promise<commonResponseDto<userResponseDto>> {
+    dto: UserRequestDto,
+  ): Promise<CommonResponseDto<UserResponseDto>> {
     if (
       await this.prismaService.user.findUnique({
         where: {
@@ -39,13 +43,13 @@ export class UsersService {
         image_no: Math.floor(Math.random() * TOTAL_IMAGE_NO),
       },
     });
-    return new commonResponseDto(
+    return new CommonResponseDto(
       'success',
-      new userResponseDto(user.id, user.username, user.email, user.image_no),
+      new UserResponseDto(user.id, user.username, user.email, user.image_no),
     );
   }
 
-  async login(dto: loginRequestDto, res: Response) {
+  async login(dto: LoginRequestDto, res: Response) {
     const user = await this.prismaService.user.findUnique({
       where: {
         email: dto.email,
@@ -60,9 +64,9 @@ export class UsersService {
         this.jwtService.sign({ id: user.id, email: user.email }),
       )
       .send(
-        new commonResponseDto(
+        new CommonResponseDto(
           'success',
-          new userResponseDto(
+          new UserResponseDto(
             user.id,
             user.username,
             user.email,
@@ -73,14 +77,14 @@ export class UsersService {
     return;
   }
 
-  async updateMe(user: User, dto: userRequestDto) {
+  async updateMe(user: User, dto: UserRequestDto) {
     const result = await this.prismaService.user.update({
       where: { id: user.id },
       data: dto,
     });
-    return new commonResponseDto(
+    return new CommonResponseDto(
       'success',
-      new userResponseDto(
+      new UserResponseDto(
         result.id,
         result.username,
         result.email,
@@ -89,20 +93,56 @@ export class UsersService {
     );
   }
 
-  async deleteMe(user: User) {
+  async deleteMe(user: User): Promise<CommonResponseDto> {
     await this.prismaService.user.delete({
       where: {
         id: user.id,
       },
     });
-    return new commonResponseDto('success');
+    return new CommonResponseDto('success');
   }
 
-  async readMyHistories(user: User) {
-    return 'Hello';
+  async readMyHistories(
+    user: User,
+    query: HistoryQuery,
+  ): Promise<CommonResponseDto<HistoryResponseDto>> {
+    const where = {
+      user_id: user.id,
+      language_no: query.languageNo,
+      ...(query.grammarNo && { grammar_no: query.grammarNo }),
+    };
+    const histories = await this.prismaService.history.findMany({
+      where,
+      select: {
+        grammar_no: true,
+        language_no: true,
+        record: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      skip: (query.pageNumber - 1) * query.pageSize,
+      take: query.pageSize,
+    });
+    const totalCount = await this.prismaService.history.count({
+      where,
+    });
+    return new CommonResponseDto<HistoryResponseDto>('success', {
+      histories,
+      histories_meta: new Page(query.pageNumber, query.pageSize, totalCount),
+    });
   }
 
-  async createMyHistory(user: User) {
-    return 'Hello';
+  async createMyHistory(user: User, dto: HistoryRequestDto) {
+    await this.prismaService.history.create({
+      data: {
+        user_id: user.id,
+        grammar_no: dto.grammar_no,
+        language_no: dto.language_no,
+        record: dto.record,
+      },
+    });
+    return new CommonResponseDto('success');
   }
 }

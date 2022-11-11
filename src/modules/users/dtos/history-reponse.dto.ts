@@ -1,11 +1,11 @@
 import { Page } from 'src/common/dtos/pagination.dto';
 
-export class historyResponseDto {
+export class HistoryResponseDto {
   histories: {
     language_no: number;
     grammar_no: number;
     record: number;
-    createdAt: Date;
+    created_at: Date;
   }[];
   histories_meta: Page;
 }

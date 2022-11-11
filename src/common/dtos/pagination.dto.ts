@@ -1,5 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsPositive } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
 export class Page {
   pageNumber: number;
@@ -16,21 +17,17 @@ export class Page {
 }
 
 export class PageQuery {
+  @ApiProperty()
   @Type(() => Number)
   @IsInt()
   @IsPositive()
+  @IsNotEmpty()
   pageNumber: number;
 
+  @ApiProperty()
   @Type(() => Number)
   @IsInt()
   @IsPositive()
+  @IsNotEmpty()
   pageSize: number;
-
-  getOffset(): number {
-    return (this.pageNumber - 1) * this.pageSize;
-  }
-
-  getLimit(): number {
-    return this.pageSize;
-  }
 }
