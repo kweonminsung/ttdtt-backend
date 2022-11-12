@@ -8,7 +8,7 @@ import configuration from './configuration';
       isGlobal: true,
       cache: true,
       load: [configuration],
-      ...(process.env.APP_ENV === 'development' && { envFilePath: '.env' }),
+      ...(process.env.APP_ENV !== 'production' && { envFilePath: '.env' }),
     }),
   ],
 })
