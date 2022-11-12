@@ -2,6 +2,6 @@ FROM node:16.16.0
 
 COPY ./ ./
 
-RUN npm install
+RUN npm install && npm run build
 
-CMD npm run build && npm run start:prod
+CMD npm run start:prod
