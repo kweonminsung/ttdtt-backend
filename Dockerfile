@@ -1,12 +1,6 @@
 FROM node:16.16.0
 
-WORKDIR /home
-
-ADD https://worldtimeapi.org/api/timezone/Asia/Seoul /tmp/bustcache
-
-RUN git clone "https://${GITHUB_ID}@${GITHUB_PASSWORD}github.com/kweonminsung/ttdtt-backend.git"
-
-WORKDIR /home/ttdtt-backend
+COPY ./ ./
 
 RUN npm install
 
