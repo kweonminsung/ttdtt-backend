@@ -108,8 +108,9 @@ export class UsersService {
   ): Promise<CommonResponseDto<HistoryResponseDto>> {
     const where = {
       user_id: user.id,
-      language_no: query.languageNo,
-      ...(query.grammarNo && { grammar_no: query.grammarNo }),
+      ...(query.languageNo && { language_no: query.languageNo }),
+      ...(query.languageNo &&
+        query.grammarNo && { grammar_no: query.grammarNo }),
     };
     const histories = await this.prismaService.history.findMany({
       where,

@@ -13,8 +13,9 @@ export class RanksService {
     query: HistoryQuery,
   ): Promise<CommonResponseDto<RankResponseDto>> {
     const where = {
-      language_no: query.languageNo,
-      ...(query.grammarNo && { grammar_no: query.grammarNo }),
+      ...(query.languageNo && { language_no: query.languageNo }),
+      ...(query.languageNo &&
+        query.grammarNo && { grammar_no: query.grammarNo }),
     };
     const ranks = await this.prismaService.history.findMany({
       where,

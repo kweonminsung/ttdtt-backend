@@ -38,7 +38,8 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: '*',
+    credentials: true,
+    origin: ['http://localhost:3000', 'https://tadak.vercel.app'],
   });
 
   console.log(`==== Running as ${process.env.APP_ENV} ====`);
