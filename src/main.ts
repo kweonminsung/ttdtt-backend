@@ -12,8 +12,6 @@ async function bootstrap() {
   // Env settings
   const appConfig = app.get(ConfigService);
 
-  app.setGlobalPrefix('api');
-
   // Config for Prisma
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
