@@ -77,10 +77,44 @@ export class UsersService {
     return;
   }
 
+  async getMe(
+    user: User,
+  ): Promise<
+    CommonResponseDto<
+      UserResponseDto & { ranking: number; highest_record: number }
+    >
+  > {
+    const ranks = await await this.prismaService.history.groupBy({
+      by: ['user_id'],
+      _max: {
+        record: true,
+      },
+      orderBy: {
+        _max: {
+          record: 'desc',
+        },
+      },
+    });
+    const user_ranking = ranks.map((info) => info.user_id).indexOf(user.id);
+    return new CommonResponseDto('success', {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      image_no: user.image_no,
+      ranking: user_ranking + 1,
+      highest_record: ranks[user_ranking]._max.record,
+    });
+  }
+
   async updateMe(user: User, dto: UserRequestDto) {
     const result = await this.prismaService.user.update({
       where: { id: user.id },
-      data: dto,
+      data: {
+        username: dto.username,
+        password: await bcrypt.hash(dto.password, SALT_OR_ROUNDS),
+        email: dto.email,
+        image_no: dto.image_no,
+      },
     });
     return new CommonResponseDto(
       'success',
