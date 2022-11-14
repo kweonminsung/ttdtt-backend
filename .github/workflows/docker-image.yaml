@@ -1,21 +1,23 @@
-name: Docker image CI/CD
+name: deploy
 
 on:
   push:
     branches: ['main']
 
 jobs:
-  build:
+  buildndeploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3
+      - uses: actions/checkout@v2.5.0
 
       - name: Build docker image
-      - uses: docker build -t tadakbe:latest
+        run: docker build -t ghcr.io/kweonminsung/tadakbe:latest .
 
       - name: Docker login & push
-      - uses: docker login -u ghcr.io -u ${{ secretes.GHCR_USERNAME }} -p ${{ secrets.GHCR_PASSWORD }}
-      - uses: docker push ghcr.io/kweonminsung/tadakbe:latest
+        run: docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_PASSWORD }}
+
+      - name: Push image to registry
+        run: docker push ghcr.io/kweonminsung/tadakbe:latest
 
       - name: SSH Remote Commands
         uses: appleboy/ssh-action@v0.1.5
@@ -24,6 +26,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker login -u ghcr.io -u ${{ secretes.GHCR_USERNAME }} -p ${{ secrets.GHCR_PASSWORD }}
-            docker-compose pull
-            docker-compose up --force-recreate --build -d
+            sudo docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_PASSWORD }}
+            sudo docker-compose pull
+            sudo docker-compose up --force-recreate --build -d
+            sudo docker image prune -f
