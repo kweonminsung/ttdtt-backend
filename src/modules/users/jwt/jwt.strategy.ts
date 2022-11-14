@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly prismaService: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => req?.cookies?.ttdtt_web_token,
+        (req: Request) => req?.cookies?.tadak_web_token,
       ]),
       secretOrKey: JWT_SECRET,
       ignoreExpiration: false,

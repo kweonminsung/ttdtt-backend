@@ -60,7 +60,7 @@ export class UsersService {
 
     res
       .cookie(
-        'ttdtt_web_token',
+        'tadak_web_token',
         this.jwtService.sign({ id: user.id, email: user.email }),
       )
       .send(

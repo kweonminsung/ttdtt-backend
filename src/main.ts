@@ -30,7 +30,7 @@ async function bootstrap() {
   // Config for Swagger
   const swaggerConfig = new DocumentBuilder()
     .setTitle('탁. 타닥. 탁탁.')
-    .setDescription('The API description for TTDTT')
+    .setDescription('The API description for TADAK')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
@@ -39,7 +39,7 @@ async function bootstrap() {
   // CORS
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:3000', 'https://ttdtt.kro.kr'],
+    origin: ['http://localhost:3000', 'https://tadak.dev'],
   });
 
   console.log(`==== Running as ${process.env.APP_ENV} ====`);
