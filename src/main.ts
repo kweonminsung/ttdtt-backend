@@ -39,7 +39,11 @@ async function bootstrap() {
   // CORS
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:3000', 'https://tadak.dev'],
+    origin: [
+      'http://localhost:3000',
+      'https://tadak.dev',
+      'https://taktadaktaktak.gdscapp-test.kingo.dev',
+    ],
   });
 
   console.log(`==== Running as ${process.env.APP_ENV} ====`);

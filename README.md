@@ -2,6 +2,8 @@
 
 타닥: 온라인 코딩 연습 사이트 백엔드
 
+![Build Status](https://github.com/kweonminsung/tadak-backend/actions/workflows/docker-image.yaml/badge.svg)
+
 ### Prerequistes
 
 - Node.js 16.x LTS
