@@ -49,11 +49,12 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '유저 정보 조회 (JWT 검증)' })
-  getMe(
-    @Req() req: Request,
-  ): Promise<
+  getMe(@Req() req: Request): Promise<
     CommonResponseDto<
-      UserResponseDto & { ranking: number; highest_record: number }
+      UserResponseDto & {
+        ranking: number | null;
+        highest_record: number | null;
+      }
     >
   > {
     return this.usersService.getMe(req.user as User);

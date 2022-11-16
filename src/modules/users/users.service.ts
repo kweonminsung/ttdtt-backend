@@ -77,32 +77,28 @@ export class UsersService {
     return;
   }
 
-  async getMe(
-    user: User,
-  ): Promise<
+  async getMe(user: User): Promise<
     CommonResponseDto<
-      UserResponseDto & { ranking: number; highest_record: number }
+      UserResponseDto & {
+        ranking: number | null;
+        highest_record: number | null;
+      }
     >
   > {
-    const ranks = await await this.prismaService.history.groupBy({
-      by: ['user_id'],
-      _max: {
-        record: true,
-      },
-      orderBy: {
-        _max: {
-          record: 'desc',
-        },
-      },
-    });
-    const user_ranking = ranks.map((info) => info.user_id).indexOf(user.id);
+    const user_rank_info = (
+      await this.prismaService.$queryRaw`
+      SELECT ranking, highest_record FROM (SELECT user_id, MAX(record) as highest_record, RANK() OVER (ORDER BY MAX(record) DESC) AS ranking FROM History GROUP BY user_id) user_ranks WHERE user_id = ${user.id};
+      `
+    )[0];
     return new CommonResponseDto('success', {
       id: user.id,
       username: user.username,
       email: user.email,
       image_no: user.image_no,
-      ranking: user_ranking + 1,
-      highest_record: ranks[user_ranking]._max.record,
+      ranking:
+        user_rank_info !== undefined ? Number(user_rank_info.ranking) : null,
+      highest_record:
+        user_rank_info !== undefined ? user_rank_info.highest_record : null,
     });
   }
 
