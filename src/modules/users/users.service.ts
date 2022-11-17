@@ -62,6 +62,7 @@ export class UsersService {
       .cookie(
         'tadak_web_token',
         this.jwtService.sign({ id: user.id, email: user.email }),
+        { sameSite: 'none', secure: true },
       )
       .send(
         new CommonResponseDto(

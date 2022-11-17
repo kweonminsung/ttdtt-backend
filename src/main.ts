@@ -42,6 +42,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://tadak.dev',
+      'https://www.tadak.dev',
       'https://taktadaktaktak.gdscapp-test.kingo.dev',
     ],
   });
