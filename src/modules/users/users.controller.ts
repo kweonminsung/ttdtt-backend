@@ -60,6 +60,7 @@ export class UsersController {
   }
 
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '유저 정보 조회 (JWT 검증)' })
   getMe(@Req() req: Request): Promise<
     CommonResponseDto<
