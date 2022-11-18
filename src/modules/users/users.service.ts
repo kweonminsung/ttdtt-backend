@@ -62,7 +62,7 @@ export class UsersService {
       .cookie(
         'tadak_web_token',
         this.jwtService.sign({ id: user.id, email: user.email }),
-        { sameSite: 'none', secure: true },
+        { sameSite: 'none', secure: true, httpOnly: true },
       )
       .send(
         new CommonResponseDto(
@@ -88,7 +88,13 @@ export class UsersService {
   > {
     const user_rank_info = (
       await this.prismaService.$queryRaw`
-      SELECT ranking, highest_record FROM (SELECT user_id, MAX(record) as highest_record, RANK() OVER (ORDER BY MAX(record) DESC) AS ranking FROM History GROUP BY user_id) user_ranks WHERE user_id = ${user.id};
+        SELECT ranking, highest_record
+        FROM (
+          SELECT user_id, MAX(record) AS highest_record, RANK() OVER (ORDER BY MAX(record) DESC) AS ranking
+          FROM History
+          GROUP BY user_id
+        ) user_ranks
+        WHERE user_id = ${user.id};
       `
     )[0];
     return new CommonResponseDto('success', {

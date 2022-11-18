@@ -1,9 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CommonResponseDto } from 'src/common/dtos/common-reponse.dto';
 import { Page } from 'src/common/dtos/pagination.dto';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { HistoryQuery } from '../users/dtos/history-query.dto';
+import { UserResponseDto } from '../users/dtos/user-response.dto';
 import { RankResponseDto } from './dtos/rank-response.dto';
+import { RankDto } from './dtos/rank.dto';
+
+interface RawRank {
+  language_no: number;
+  grammar_no: number;
+  created_at: Date;
+  id: number;
+  email: string;
+  username: string;
+  image_no: number;
+  highest_record: number;
+  ranking: bigint;
+}
 
 @Injectable()
 export class RanksService {
@@ -12,34 +27,50 @@ export class RanksService {
   async findAll(
     query: HistoryQuery,
   ): Promise<CommonResponseDto<RankResponseDto>> {
-    const where = {
-      ...(query.languageNo && { language_no: query.languageNo }),
-      ...(query.languageNo &&
-        query.grammarNo && { grammar_no: query.grammarNo }),
-    };
-    const ranks = await this.prismaService.history.findMany({
-      where,
-      select: {
-        language_no: true,
-        grammar_no: true,
-        record: true,
-        created_at: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            image_no: true,
-          },
-        },
-      },
-      orderBy: { record: 'desc' },
-      skip: (query.pageNumber - 1) * query.pageSize,
-      take: query.pageSize,
-    });
-    const totalCount = await this.prismaService.history.count({
-      where,
-    });
+    let where: Prisma.Sql = Prisma.sql``;
+    if (query.languageNo) {
+      if (query.grammarNo)
+        where = Prisma.sql`WHERE language_no=${query.languageNo} AND grammar_no=${query.grammarNo}`;
+      else where = Prisma.sql`WHERE language_no=${query.languageNo}`;
+    }
+
+    const raw_ranks: RawRank[] = await this.prismaService.$queryRaw`
+      SELECT language_no, grammar_no, created_at, User.id, User.email, User.username, User.image_no, MAX(record) AS highest_record, RANK() OVER (ORDER BY MAX(record) DESC) AS ranking
+      FROM History
+      LEFT JOIN User ON User.id = History.user_id
+      ${where}
+      GROUP BY user_id
+      LIMIT ${query.pageSize}
+      OFFSET ${(query.pageNumber - 1) * query.pageSize};
+    `;
+    const ranks: RankDto[] = [];
+    for (const rank of raw_ranks) {
+      ranks.push(
+        new RankDto(
+          new UserResponseDto(
+            rank.id,
+            rank.username,
+            rank.email,
+            rank.image_no,
+          ),
+          rank.language_no,
+          rank.grammar_no,
+          rank.highest_record,
+          rank.ranking,
+          rank.created_at,
+        ),
+      );
+    }
+
+    const totalCount = Number(
+      (
+        await this.prismaService.$queryRaw`
+          SELECT COUNT(DISTINCT user_id) AS total_count
+          FROM History
+          ${where};
+        `
+      )[0].total_count,
+    );
     return new CommonResponseDto<RankResponseDto>('success', {
       ranks,
       ranks_meta: new Page(query.pageNumber, query.pageSize, totalCount),

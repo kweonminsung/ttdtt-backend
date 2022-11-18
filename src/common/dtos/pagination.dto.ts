@@ -6,13 +6,13 @@ export class Page {
   pageNumber: number;
   pageSize: number;
   totalCount: number;
-  totalPage: number;
+  totalPages: number;
 
   constructor(pageNumber: number, pageSize: number, totalCount: number) {
     this.pageNumber = pageNumber;
     this.pageSize = pageSize;
     this.totalCount = totalCount;
-    this.totalPage = Math.ceil(totalCount / pageSize);
+    this.totalPages = Math.ceil(totalCount / pageSize);
   }
 }
 
