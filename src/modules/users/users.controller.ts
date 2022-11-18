@@ -46,8 +46,20 @@ export class UsersController {
     return await this.usersService.login(dto, res);
   }
 
-  @Get('me')
+  @Post('me/logout')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '로그아웃' })
+  logout(@Res() res: Response) {
+    res
+      .clearCookie('tadak_web_token', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+      })
+      .send(new CommonResponseDto('success'));
+  }
+
+  @Get('me')
   @ApiOperation({ summary: '유저 정보 조회 (JWT 검증)' })
   getMe(@Req() req: Request): Promise<
     CommonResponseDto<
