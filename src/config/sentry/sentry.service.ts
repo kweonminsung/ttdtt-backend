@@ -7,7 +7,7 @@ export class SentryService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {}
 
   onModuleInit() {
-    const env = this.configService.get<string>('app.env');
+    const env = this.configService.get('app.env');
 
     Sentry.init({
       dsn: this.configService.get('sentry.dsn'),
