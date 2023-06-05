@@ -39,28 +39,52 @@ export class RanksService {
       FROM History
       LEFT JOIN User ON User.id = History.user_id
       ${where}
-      GROUP BY user_id
+      GROUP BY user_id, language_no, grammar_no, created_at, User.id, User.email, User.username, User.image_no
       LIMIT ${query.pageSize}
       OFFSET ${(query.pageNumber - 1) * query.pageSize};
     `;
-    const ranks: RankDto[] = [];
-    for (const rank of raw_ranks) {
-      ranks.push(
-        new RankDto(
-          new UserResponseDto(
-            rank.id,
-            rank.username,
-            rank.email,
-            rank.image_no,
+
+    // if there are multiple records with the same email, only the one with the highest record is returned
+    const processedRanks = raw_ranks.reduce((acc, cur) => {
+      const existingRank = acc.find((rank) => rank.user.id === cur.id);
+      if (existingRank) {
+        if (existingRank.highestRecord < cur.highest_record) {
+          existingRank.highestRecord = cur.highest_record;
+          existingRank.ranking = cur.ranking;
+        }
+      } else {
+        acc.push(
+          new RankDto(
+            new UserResponseDto(cur.id, cur.username, cur.email, cur.image_no),
+            cur.language_no,
+            cur.grammar_no,
+            cur.highest_record,
+            cur.ranking,
+            cur.created_at,
           ),
-          rank.language_no,
-          rank.grammar_no,
-          rank.highest_record,
-          rank.ranking,
-          rank.created_at,
-        ),
-      );
-    }
+        );
+      }
+      return acc;
+    }, []);
+
+    // const ranks: RankDto[] = [];
+    // for (const rank of raw_ranks) {
+    //   ranks.push(
+    //     new RankDto(
+    //       new UserResponseDto(
+    //         rank.id,
+    //         rank.username,
+    //         rank.email,
+    //         rank.image_no,
+    //       ),
+    //       rank.language_no,
+    //       rank.grammar_no,
+    //       rank.highest_record,
+    //       rank.ranking,
+    //       rank.created_at,
+    //     ),
+    //   );
+    // }
 
     const totalCount = Number(
       (
@@ -72,7 +96,7 @@ export class RanksService {
       )[0].total_count,
     );
     return new CommonResponseDto<RankResponseDto>('success', {
-      ranks,
+      ranks: processedRanks,
       ranks_meta: new Page(query.pageNumber, query.pageSize, totalCount),
     });
   }
